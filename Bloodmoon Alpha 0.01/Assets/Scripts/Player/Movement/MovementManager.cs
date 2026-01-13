@@ -3,18 +3,20 @@ using UnityEngine;
 public class MovementManager : MonoBehaviour
 {
     public float moveSpeed = 2;
+    public float speedMultiplier = 2.5f;
 
     private Walking move;
+    private Running run;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         move = GetComponent<Walking>();
+        run = GetComponent<Running>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        move.Move(moveSpeed);
+        speedMultiplier = run.run();
+        move.Move(moveSpeed * speedMultiplier);
     }
 }

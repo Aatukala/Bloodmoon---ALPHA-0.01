@@ -1,12 +1,16 @@
 using UnityEngine;
+using System.Collections;
 
 public class Walking : MonoBehaviour
 {
     public void Move(float speed)
     {
+        Debug.Log("Moving at speed: " + speed);
         if (Input.GetKey(KeyCode.W))
         {
+            Debug.Log("Before Moving Forward: " + transform.position);
             transform.position += Vector3.forward * speed * Time.deltaTime;
+            Debug.Log("Walking Forward");
         }
         if (Input.GetKey(KeyCode.S))
         {
