@@ -54,8 +54,8 @@ MonoBehaviour:
   connectorLayer:
     serializedVersion: 2
     m_Bits: 2147483648
-  ghostMaterialValid: {fileID: 0}
-  ghostMaterialInvalid: {fileID: 0}
+  ghostMaterialValid: {fileID: 2100000, guid: eaacf827426691c4b83c60ab3cef392a, type: 2}
+  ghostMaterialInvalid: {fileID: 2100000, guid: f06784e08c54eb941b750f5c32581f16, type: 2}
   connectorOverlapRadius: 1
   maxGroundAngle: 45
   isBuilding: 0
