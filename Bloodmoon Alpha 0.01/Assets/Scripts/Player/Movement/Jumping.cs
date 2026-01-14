@@ -1,4 +1,3 @@
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Jumping : MonoBehaviour
@@ -11,7 +10,7 @@ public class Jumping : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-    public void OnTriggerEnter(Collider other)
+    public void OnTriggerStay(Collider other)
     {
         isOnGround = true;
     }
