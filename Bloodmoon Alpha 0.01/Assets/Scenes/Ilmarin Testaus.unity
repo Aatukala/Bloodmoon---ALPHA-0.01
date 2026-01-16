@@ -268,8 +268,59 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9ae681f9b8a7d3468376e3a2fd7fe6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PerformanseTester
-  numbers: 500
+  numbers: 0
   enemy: {fileID: 4117378132030884460, guid: e68f7cb990aba80478301b1909d54280, type: 3}
+--- !u!1 &842924856
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 842924858}
+  - component: {fileID: 842924857}
+  m_Layer: 0
+  m_Name: Builder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &842924857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 842924856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58904f15a8ab8e84da613ab4a95a64a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Builder
+  building: 0
+  Ghoust: {fileID: 0}
+  buildings:
+  - {fileID: 5154142023962115778, guid: 1286cc83da4e11246a5ec22916618046, type: 3}
+  mask:
+    serializedVersion: 2
+    m_Bits: 55
+--- !u!4 &842924858
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 842924856}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 34.22678, y: 22.11828, z: -14.23529}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1247707870
 GameObject:
   m_ObjectHideFlags: 0
@@ -617,9 +668,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4357339037014856234, guid: b1efdf277bc2fbe488cd9553bd8939a2, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5720249563089100341, guid: b1efdf277bc2fbe488cd9553bd8939a2, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 5720249563089100341, guid: b1efdf277bc2fbe488cd9553bd8939a2, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -635,3 +694,4 @@ SceneRoots:
   - {fileID: 4000234978455482936}
   - {fileID: 1247707874}
   - {fileID: 235834723192902184}
+  - {fileID: 842924858}
