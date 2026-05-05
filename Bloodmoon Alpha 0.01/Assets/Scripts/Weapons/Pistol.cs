@@ -17,6 +17,10 @@ public class Pistol : MonoBehaviour
     [Header("Fire Mode")]
     [SerializeField] private bool autoFire = false;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip shootSound;
+
     private float lastShotTime;
 
     private PlayerInput input;
@@ -63,6 +67,12 @@ public class Pistol : MonoBehaviour
 
     void Shoot()
     {
+        // Play sound
+        if (audioSource != null && shootSound != null)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+
         Ray ray = new Ray(
             Camera.main.transform.position,
             Camera.main.transform.forward
