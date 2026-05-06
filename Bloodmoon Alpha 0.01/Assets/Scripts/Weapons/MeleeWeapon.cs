@@ -18,6 +18,10 @@ public class MeleeWeapon : MonoBehaviour
     [SerializeField] private float thrustDistance = 0.3f;
     [SerializeField] private float swingSpeed = 10f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip swingSound;
+
     private float lastAttackTime = -Mathf.Infinity;
     private Quaternion originalRotation;
     private Vector3 originalPosition;
@@ -52,6 +56,13 @@ public class MeleeWeapon : MonoBehaviour
         isSwinging = true;
         readytoshoot = false;
 
+        // 🔊 Swing sound
+        if (audioSource != null && swingSound != null)
+        {
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            audioSource.PlayOneShot(swingSound);
+        }
+
         Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, range, hitMask))
         {
@@ -60,12 +71,7 @@ public class MeleeWeapon : MonoBehaviour
             {
                 Vector3 knockback = Camera.main.transform.forward * weaponItem.knockbackForce;
                 dmg.TakeDamage(weaponItem.damage, knockback);
-                Debug.Log($"Hit {dmg.name} for {weaponItem.damage} damage!");
             }
-        }
-        else
-        {
-            Debug.Log("Melee attack missed.");
         }
     }
 
