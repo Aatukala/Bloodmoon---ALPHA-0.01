@@ -232,7 +232,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Pistol
   pistolItem: {fileID: 11400000, guid: 237e8d1812a26c84a992aeca1a0ba02a, type: 2}
   firePoint: {fileID: 9122690874636603077}
-  fireCooldown: 0.15
+  fireCooldown: 1
   range: 100
   hitMask:
     serializedVersion: 2

@@ -21,6 +21,7 @@ public class MeleeWeapon : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip swingSound;
+    [SerializeField] private AudioClip hitSound;
 
     private float lastAttackTime = -Mathf.Infinity;
     private Quaternion originalRotation;
@@ -71,7 +72,20 @@ public class MeleeWeapon : MonoBehaviour
             {
                 Vector3 knockback = Camera.main.transform.forward * weaponItem.knockbackForce;
                 dmg.TakeDamage(weaponItem.damage, knockback);
+
+                // 🔊 Hit sound (separate pitch = more variation)
+                if (audioSource != null && hitSound != null)
+                {
+                    audioSource.pitch = Random.Range(0.95f, 1.05f);
+                    audioSource.PlayOneShot(hitSound);
+                }
+
+                Debug.Log($"Hit {dmg.name} for {weaponItem.damage} damage!");
             }
+        }
+        else
+        {
+            Debug.Log("Melee attack missed.");
         }
     }
 
