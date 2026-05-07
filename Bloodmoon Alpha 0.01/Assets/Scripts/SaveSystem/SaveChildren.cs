@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
 
 public class SaveChildren : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class SaveChildren : MonoBehaviour
             SaveSystem.Save();
             loaded = true;
         }
-        if (Input.GetKeyDown(KeyCode.R) && !loaded)
+        if (Input.GetKeyDown(KeyCode.P) && !loaded)
         {
             SaveSystem.Load();
             loaded = true;
@@ -26,6 +27,7 @@ public class SaveChildren : MonoBehaviour
     {
         if (transform.childCount > 0)
         {
+            data.Storages = new List<BoxData>();
             data.names = new List<string>();
             Transform[] trans = transform.GetComponentsInChildren<Transform>();
             data.locations = new List<Vector3>();
@@ -39,12 +41,21 @@ public class SaveChildren : MonoBehaviour
             for (int i = 0; trans.Length > i; i++)
             {
                 data.names.Add(trans[i].name);
+                if (trans[i].GetComponent<Storage>() != null)
+                {
+                    SaveStorage(trans[i].gameObject, ref data);
+                }
             }
         }
     }
 
     public void Load(ChildSaveData data)
     {
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+        int StorageNumber = 0;
         GameObject builder = GameObject.Find("Builder");
         for (int i = 0; data.names.Count > i; i++)
         {
@@ -54,10 +65,14 @@ public class SaveChildren : MonoBehaviour
                 if (builder.GetComponent<Builder>().buildings[x].name + "(Clone)" == data.names[i])
                 {
                     found = true;
-                    bool work = Instantiate(builder.GetComponent<Builder>().buildings[x], data.locations[i], data.rotations[i], transform);
-                    if (!work)
+                    GameObject work = Instantiate(builder.GetComponent<Builder>().buildings[x], data.locations[i], data.rotations[i], transform);
+                    if (work == null)
                     {
                         Debug.Log("load " + i + " Faild");
+                    }
+                    else if (work.GetComponent<Storage>() != null) 
+                    {
+                        LoadStorage(ref StorageNumber, work, data);
                     }
                 }
             }
@@ -68,11 +83,76 @@ public class SaveChildren : MonoBehaviour
         }
         builder.GetComponent<Builder>().update.NavUpdate();
     }
+
+    public void SaveLines(ref LineSaveData data)
+    {
+        Debug.Log("Start Line Save");
+        data.post1Locations = new List<Vector3>();
+        data.post2Locations = new List<Vector3>();
+        ZiplineManager LineManager = transform.GetComponent<ZiplineManager>();
+        if (LineManager != null)
+        {
+            foreach (ZiplineManager.zipline line in LineManager.ziplines)
+            {
+                data.post1Locations.Add(line.post1.transform.position);
+                data.post2Locations.Add(line.post2.transform.position);
+                Debug.Log(line.post1.transform.position);
+                Debug.Log(line.post2.transform.position);
+                Debug.Log("Line Saved");
+            }
+        }
+        else
+        {
+            Debug.LogError("LineManagerNotFound");
+        }
+    }
+
+    public void LoadLines(LineSaveData data)
+    {
+        ZiplineManager LineManager = transform.GetComponent<ZiplineManager>();
+        for (int i = 0; i < data.post1Locations.Count; i++)
+        {
+            Collider[] colliders1 = Physics.OverlapSphere(data.post1Locations[i], 1f);
+            Collider[] colliders2 = Physics.OverlapSphere(data.post2Locations[i], 1f);
+            if (colliders1.Length > 0 && colliders2.Length > 0)
+            {
+                LineManager.CreateZipLine(colliders1[0].gameObject, colliders2[0].gameObject);
+            }
+        }
+    }
+
+    public void SaveStorage(GameObject storage, ref ChildSaveData Data)
+    {
+        BoxData boxData = new BoxData();
+        boxData.storage = storage.GetComponent<Storage>().storage;
+        Data.Storages.Add(boxData);
+    }
+
+    public void LoadStorage(ref int num, GameObject storage, ChildSaveData Data)
+    {
+        storage.GetComponent<Storage>().storage = Data.Storages[num].storage;
+        num += 1;
+    }
 }
+
 [System.Serializable]
 public struct ChildSaveData
 {
     public List<Vector3> locations;
     public List<Quaternion> rotations;
     public List<string> names;
+    public List<BoxData> Storages;
+}
+
+[System.Serializable]
+public struct LineSaveData
+{
+    public List<Vector3> post1Locations;
+    public List<Vector3> post2Locations;
+}
+
+[System.Serializable]
+public struct BoxData
+{
+    public List<Storage.itemInfo> storage;
 }

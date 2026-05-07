@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,7 +24,7 @@ public class Inventory : MonoBehaviour
     [SerializeField] Button giveItemBtn;
 
 
-    private void Awake()
+    private void Awake() //Tapahtuu kun alku
     {
         Singleton = this;
         giveItemBtn.onClick.AddListener(() => SpawnInventoryItem());
@@ -89,6 +89,11 @@ public class Inventory : MonoBehaviour
     }
     public void Craft(Recipe recipe)
     {
+        if (carriedItem != null)
+        {
+            Debug.Log("Cannot craft while dragging an item!");
+            return;
+        }
         if (!CanCraft(recipe))
         {
             Debug.Log("Not enough materials!");
@@ -233,5 +238,12 @@ public class Inventory : MonoBehaviour
         }
 
         return true;
+    }
+    public delegate void OnInventorySlotChanged(InventorySlot slot);
+    public event OnInventorySlotChanged InventorySlotChanged;
+
+    public void UpdateSlot(InventorySlot slot)
+    {
+        InventorySlotChanged?.Invoke(slot);
     }
 }

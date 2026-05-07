@@ -7,6 +7,9 @@ public class ArrowProjectile : MonoBehaviour
 
     private Rigidbody rb;
 
+    private float damage;
+    private float knockback;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -17,8 +20,10 @@ public class ArrowProjectile : MonoBehaviour
         Destroy(gameObject, lifeTime);
     }
 
-    public void Launch(Vector3 direction)
+    public void Launch(Vector3 direction, float dmg, float kb)
     {
+        damage = dmg;
+        knockback = kb;
         rb.linearVelocity = direction * speed;
     }
 
@@ -30,6 +35,14 @@ public class ArrowProjectile : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        IDamageable dmgTarget = collision.collider.GetComponentInParent<IDamageable>();
+
+        if (dmgTarget != null)
+        {
+            Vector3 knock = transform.forward * knockback;
+            dmgTarget.TakeDamage(damage, knock);
+        }
+
         Destroy(gameObject);
     }
 }

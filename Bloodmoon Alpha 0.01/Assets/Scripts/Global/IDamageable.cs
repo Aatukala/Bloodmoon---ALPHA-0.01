@@ -1,41 +1,57 @@
 using UnityEngine;
+using System;
 
 public class IDamageable : MonoBehaviour
 {
     [Header("Health Settings")]
     public float health = 50f;
     [SerializeField] protected float maxHealth = 50f;
-    protected virtual void DealDamage(float dmg, GameObject target)
+    [SerializeField] protected bool canTakeKnockback = true;
+
+    [Header("Effects")]
+    [SerializeField] public ParticleSystem bloodEffect;
+
+    public static Action OnPlayerDeath;
+
+    public float Health => health;
+    public float MaxHealth => maxHealth;
+    public bool IsDead => health <= 0f;
+
+    protected virtual void DealDamage(float dmg, GameObject target, Vector3 knockBack)
     {
         if (target.TryGetComponent(out IDamageable damageable))
         {
-            Debug.Log($"Dealing {dmg} damage to {target.name}");
-            damageable.TakeDamage(dmg);
-        }
-        else
-        {
-            Debug.LogWarning($"{target.name} does not implement IDamageable.");
+            damageable.TakeDamage(dmg, knockBack);
         }
     }
 
-    protected virtual void TakeDamage(float dmg)
+    public virtual void TakeDamage(float dmg, Vector3 knockBack)
     {
+        if (IsDead) return;
+
         health = Mathf.Clamp(health - dmg, 0f, maxHealth);
 
-        Debug.Log($"{gameObject.name} took {dmg} damage. Remaining health: {health}/{maxHealth}");
+        if (canTakeKnockback)
+            transform.position += knockBack;
+
+        if (bloodEffect != null)
+            Instantiate(bloodEffect, transform.position, Quaternion.identity);
 
         if (health <= 0f)
             Die();
     }
 
-    protected virtual void Heal(float amount)
+    public virtual void Heal(float amount)
     {
+        if (IsDead) return;
         health = Mathf.Clamp(health + amount, 0f, maxHealth);
     }
 
     protected virtual void Die()
     {
-        Debug.Log($"{gameObject.name} has died.");
-
+        if (CompareTag("Player"))
+        {
+            OnPlayerDeath?.Invoke();
+        }
     }
 }

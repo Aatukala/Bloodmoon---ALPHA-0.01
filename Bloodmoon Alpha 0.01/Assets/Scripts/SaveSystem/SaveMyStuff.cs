@@ -11,8 +11,9 @@ public class SaveMyStuff : MonoBehaviour
 {
     public GameObject ItemPrefab;
     public Item[] items;
-    public void Save(ref InventoryData Data)
+    public void Save(ref InventoryData Data) //Save
     {
+        GameObject.Find("InventoryManager").GetComponent<InventoryToggle>().SetInventoryActive(true);
         Data.InventoryItems = new List<string>();
         Data.ParentsNames = new List<string>();
         Data.InventoryNumbers = new List<int>();
@@ -20,18 +21,20 @@ public class SaveMyStuff : MonoBehaviour
         {
             Data.InventoryItems.Add(item.myItem.name);
             Data.ParentsNames.Add(item.transform.parent.name);
-            if (item.GetComponentInChildren<Text>().text != "")
+            if (item.myItem.IsStackableItem())
             {
-                Data.InventoryNumbers.Add(Convert.ToInt16(item.GetComponentInChildren<Text>().text));
+                Data.InventoryNumbers.Add(item.count);
             }
             else
             {
                 Data.InventoryNumbers.Add(0);
             }
         }
+        GameObject.Find("InventoryManager").GetComponent<InventoryToggle>().SetInventoryActive(false);
     }
     public void Load(InventoryData Data)
     {
+        GameObject.Find("InventoryManager").GetComponent<InventoryToggle>().SetInventoryActive(true);
         foreach (InventoryItem item in transform.GetComponentsInChildren<InventoryItem>())
         {
             Destroy(item.gameObject);
@@ -54,10 +57,20 @@ public class SaveMyStuff : MonoBehaviour
                     }
                 }
             }
-            RectTransform rt = item.GetComponent<RectTransform>();
             item.GetComponentInParent<InventorySlot>().SetItem(item.GetComponent<InventoryItem>());
             item.GetComponent<Image>().sprite = item.GetComponent<InventoryItem>().myItem.sprite;
+            if (Data.InventoryNumbers[i] > 0)
+            {
+                item.GetComponent<InventoryItem>().AddStack(Data.InventoryNumbers[i]);
+            }
+            RectTransform rt = item.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            rt.localScale = Vector3.one;
         }
+        GameObject.Find("InventoryManager").GetComponent<InventoryToggle>().SetInventoryActive(false);
     }
 }
 [System.Serializable]

@@ -1,14 +1,14 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class InventoryItem : MonoBehaviour, IPointerClickHandler
+public class InventoryItem : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("UI References")]
     [SerializeField] private Image itemIcon;
     [SerializeField] private Text countText;
 
-    public CanvasGroup canvasGroup { get; private set; }
+    public CanvasGroup canvasGroup { get; set; }
 
     public Item myItem { get; set; }
     public InventorySlot activeSlot { get; set; }
@@ -47,8 +47,7 @@ public class InventoryItem : MonoBehaviour, IPointerClickHandler
 
     public void AddStack(int amount)
     {
-        int maxStack = myItem != null ? myItem.GetMaxStackSize() : int.MaxValue;
-        count = Mathf.Clamp(count + amount, 0, maxStack);
+        count += amount;
         UpdateCountText();
     }
 
@@ -62,6 +61,12 @@ public class InventoryItem : MonoBehaviour, IPointerClickHandler
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
+            if (Inventory.carriedItem != null && Inventory.carriedItem != this)
+            {
+                TryMergeWith(Inventory.carriedItem);
+                return;
+            }
+
             Inventory.Singleton.SetCarriedItem(this);
         }
         else if (eventData.button == PointerEventData.InputButton.Right)
@@ -84,7 +89,6 @@ public class InventoryItem : MonoBehaviour, IPointerClickHandler
             Instantiate(this, Inventory.Singleton.DraggableRoot);
 
         splitItem.myItem = this.myItem;
-
         splitItem.activeSlot = null;
         splitItem.count = half;
         splitItem.UpdateCountText();
@@ -92,6 +96,7 @@ public class InventoryItem : MonoBehaviour, IPointerClickHandler
         Inventory.carriedItem = splitItem;
         splitItem.canvasGroup.blocksRaycasts = false;
     }
+
     public void OnEndDrag(PointerEventData eventData)
     {
         canvasGroup.blocksRaycasts = true;
@@ -99,7 +104,43 @@ public class InventoryItem : MonoBehaviour, IPointerClickHandler
         if (activeSlot != null)
         {
             activeSlot.SetItem(this);
-            // activeSlot will now reference this item, no problem
         }
+    }
+
+    private void TryMergeWith(InventoryItem other)
+    {
+        if (!myItem.IsStackableItem()) return;
+        if (other.myItem != myItem) return;
+
+        int maxStack = 100;
+        int spaceLeft = maxStack - count;
+
+        if (spaceLeft <= 0) return;
+
+        int amountToMove = Mathf.Min(spaceLeft, other.count);
+
+        AddStack(amountToMove);
+
+        other.count -= amountToMove;
+        other.UpdateCountText();
+
+        if (other.count <= 0)
+        {
+            Destroy(other.gameObject);
+            Inventory.carriedItem = null;
+        }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (myItem != null)
+        {
+            ItemTooltipUI.Instance.Show(myItem, count);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        ItemTooltipUI.Instance.Clear();
     }
 }

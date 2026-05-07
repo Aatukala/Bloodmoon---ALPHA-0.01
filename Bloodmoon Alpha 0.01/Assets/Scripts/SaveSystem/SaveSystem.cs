@@ -12,6 +12,7 @@ public class SaveSystem
     {
         public PlayerData playerData;
         public ChildSaveData childSaveData;
+        public LineSaveData lineSaveData;
         public InventoryData inventoryData;
         public QuestManagerData questData;
     }
@@ -39,6 +40,7 @@ public class SaveSystem
         if (questSave != null) {
             questSave.Save(ref saveData.questData);
         }
+        GameObject.Find("Builder").GetComponent<SaveChildren>().SaveLines(ref saveData.lineSaveData);
     }
 
     public static void Load()
@@ -59,5 +61,6 @@ public class SaveSystem
         if (questSave != null) {
             questSave.Load(saveData.questData);
         }
+        GameObject.Find("Builder").GetComponent<SaveChildren>().LoadLines(saveData.lineSaveData);
     }
 }

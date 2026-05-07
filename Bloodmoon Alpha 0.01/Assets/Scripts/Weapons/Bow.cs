@@ -1,24 +1,33 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Bow : MonoBehaviour
 {
     [Header("Item Data")]
-    [SerializeField] private Item bowItemData;   // Bow ScriptableObject
+    [SerializeField] private Item bowItemData;
 
     [Header("References")]
     [SerializeField] private Transform firePoint;
 
     [Header("Settings")]
     [SerializeField] private float shootForce = 20f;
+    [SerializeField] private float shootCooldown = 0.8f;
+
+    private float lastShotTime;
 
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
-            Shoot();
+        {
+            TryShoot();
+        }
     }
 
-    public void Shoot()
+    void TryShoot()
     {
+        if (PauseMenu.IsPaused) return;
+        if (Time.time < lastShotTime + shootCooldown)
+            return;
+
         if (bowItemData == null || bowItemData.ammoType == null)
         {
             Debug.LogWarning("Bow or ammo missing!");
@@ -31,6 +40,12 @@ public class Bow : MonoBehaviour
             return;
         }
 
+        lastShotTime = Time.time;
+        Shoot();
+    }
+
+    void Shoot()
+    {
         GameObject arrow = Instantiate(
             bowItemData.ammoType.projectilePrefab,
             firePoint.position,
@@ -38,8 +53,15 @@ public class Bow : MonoBehaviour
         );
 
         ArrowProjectile projectile = arrow.GetComponent<ArrowProjectile>();
+
         if (projectile != null)
-            projectile.Launch(firePoint.forward);
+        {
+            projectile.Launch(
+                Camera.main.transform.forward,
+                bowItemData.damage,
+                bowItemData.knockbackForce
+            );
+        }
     }
 
     bool ConsumeAmmo()

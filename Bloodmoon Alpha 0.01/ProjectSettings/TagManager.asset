@@ -14,6 +14,8 @@ TagManager:
   - StairsLeft
   - StairsLoop
   - Hotbar
+  - PreBuild
+  - Decoration
   layers:
   - Default
   - TransparentFX
@@ -24,8 +26,8 @@ TagManager:
   - Ghoust
   - Ground
   - BuildingPart
-  - 
-  - 
+  - Entitys
+  - Zipline
   - 
   - 
   - 
