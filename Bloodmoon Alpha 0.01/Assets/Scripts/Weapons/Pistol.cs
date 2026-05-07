@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Pistol : MonoBehaviour
 {
@@ -16,19 +17,34 @@ public class Pistol : MonoBehaviour
     [Header("Fire Mode")]
     [SerializeField] private bool autoFire = false;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip shootSound;
+
     private float lastShotTime;
+
+    private PlayerInput input;
+
+    private bool readytoshoot = true;
+
+    private void Start()
+    {
+        input = GameObject.Find("Character").GetComponent<PlayerInput>();
+    }
 
     private void Update()
     {
         if (autoFire)
         {
-            if (Input.GetMouseButton(0))
+            if (input.actions.FindAction("Attack").IsPressed())
                 TryShoot();
         }
         else
         {
-            if (Input.GetMouseButtonDown(0))
+            if (input.actions.FindAction("Attack").IsPressed() && readytoshoot)
                 TryShoot();
+            else if (!input.actions.FindAction("Attack").IsPressed())
+                readytoshoot = true;
         }
     }
 
@@ -46,10 +62,17 @@ public class Pistol : MonoBehaviour
 
         lastShotTime = Time.time;
         Shoot();
+        readytoshoot = false;
     }
 
     void Shoot()
     {
+        // Play sound
+        if (audioSource != null && shootSound != null)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+
         Ray ray = new Ray(
             Camera.main.transform.position,
             Camera.main.transform.forward

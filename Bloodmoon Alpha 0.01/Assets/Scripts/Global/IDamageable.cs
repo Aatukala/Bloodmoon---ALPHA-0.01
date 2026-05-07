@@ -4,8 +4,8 @@ using System;
 public class IDamageable : MonoBehaviour
 {
     [Header("Health Settings")]
-    public float health = 50f;
-    [SerializeField] protected float maxHealth = 50f;
+    [SerializeField] public float health = 50f;
+    [SerializeField] public float maxHealth = 50f;
     [SerializeField] protected bool canTakeKnockback = true;
 
     [Header("Effects")]

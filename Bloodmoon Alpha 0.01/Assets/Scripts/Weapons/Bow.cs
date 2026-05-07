@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Bow : MonoBehaviour
 {
@@ -11,14 +12,32 @@ public class Bow : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private float shootForce = 20f;
     [SerializeField] private float shootCooldown = 0.8f;
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip shootSound;
+
 
     private float lastShotTime;
 
+
+    private PlayerInput input;
+
+    private bool readytoshoot = true;
+
+    private void Start()
+    {
+        input = GameObject.Find("Character").GetComponent<PlayerInput>();
+    }
+
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (input.actions.FindAction("Attack").IsPressed() && readytoshoot)
         {
             TryShoot();
+        }
+        else if (!input.actions.FindAction("Attack").IsPressed())
+        {
+            readytoshoot = true;
         }
     }
 
@@ -42,10 +61,18 @@ public class Bow : MonoBehaviour
 
         lastShotTime = Time.time;
         Shoot();
+        readytoshoot = false;
     }
 
     void Shoot()
     {
+        // Play bow sound
+        if (audioSource != null && shootSound != null)
+        {
+            audioSource.pitch = Random.Range(0.95f, 1.05f); // slight variation
+            audioSource.PlayOneShot(shootSound);
+        }
+
         GameObject arrow = Instantiate(
             bowItemData.ammoType.projectilePrefab,
             firePoint.position,

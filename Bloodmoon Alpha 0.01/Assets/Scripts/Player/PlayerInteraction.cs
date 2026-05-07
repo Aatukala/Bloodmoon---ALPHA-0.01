@@ -1,5 +1,8 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Windows;
+using TMPro;
 
 /// <summary>
 /// Handles player interactions with breakable objects (trees, rocks, etc.)
@@ -7,14 +10,24 @@ using UnityEngine;
 /// </summary>
 public class PlayerInteraction : MonoBehaviour
 {
-    public int damage = 1;     // Damage per hit
-    public float range = 2f;   // Interaction distance
+    public int damage = 1;    
+    public float range = 2f;  
     public LayerMask mask;
+    [Header("UI Setup")]
+    [SerializeField] private GameObject hpDisplayParent;
+    [SerializeField] private TextMeshProUGUI hpText;             
+
+    private PlayerInput input;
+    private void Start()
+    {
+        input = GetComponent<PlayerInput>();
+    }
 
     void Update()
     {
+        HandleHPDisplay();
         // Left mouse click
-        if (Input.GetMouseButton(0))
+        if (input.actions.FindAction("Attack").IsPressed())
         {
             TryHit();
         }
@@ -23,42 +36,35 @@ public class PlayerInteraction : MonoBehaviour
     void TryHit()
     {
         Item equipped = PlayerHotbarController.Instance.GetEquippedItem();
+        if (equipped == null) return;
 
-        if (equipped == null)
-        {
-            //Debug.Log("No equipped item");
-            return;
-        }
-
-        //Debug.Log("Equipped tool: " + equipped.toolType);
-
-        Ray ray = new Ray(
-            Camera.main.transform.position,
-            Camera.main.transform.forward
-        );
+        Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
 
         if (Physics.Raycast(ray, out RaycastHit hit, range, mask))
         {
-            Debug.DrawRay(ray.origin,ray.direction*range, Color.red, 1000f);
-            BreakableObject breakable =
-                hit.collider.GetComponentInParent<BreakableObject>();
-
-            if (breakable == null)
+            if (equipped.toolType == ToolType.Hammer)
             {
-                //Debug.Log("Hit non-breakable");
-                //Debug.Log(hit.transform.name);
-                return;
+                BuildingID building = hit.collider.GetComponentInParent<BuildingID>();
+                if (building != null)
+                {
+                    if (building.Health < building.MaxHealth)
+                    {
+                        building.Heal(equipped.repairPower * Time.deltaTime);
+                    }
+                    return;
+                }
             }
 
-            //Debug.Log("Hit breakable: " + breakable.breakType);
+            BreakableObject breakable = hit.collider.GetComponentInParent<BreakableObject>();
 
-            if (!CanBreak(equipped.toolType, breakable.breakType))
+            if (breakable != null)
             {
-                //Debug.Log("Wrong tool for this target");
-                return;
+                if (CanBreak(equipped.toolType, breakable.breakType))
+                {
+                    breakable.TakeDamage(damage * Time.deltaTime);
+                    return;
+                }
             }
-
-            breakable.TakeDamage(damage * Time.deltaTime);
         }
     }
 
@@ -71,5 +77,30 @@ public class PlayerInteraction : MonoBehaviour
             return true;
 
         return false;
+    }
+    private void HandleHPDisplay()
+    {
+        Item equipped = PlayerHotbarController.Instance.GetEquippedItem();
+
+        if (equipped == null || equipped.toolType != ToolType.Hammer)
+        {
+            hpDisplayParent.SetActive(false);
+            return;
+        }
+
+        Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, range, mask))
+        {
+            BuildingID building = hit.collider.GetComponentInParent<BuildingID>();
+
+            if (building != null)
+            {
+                hpDisplayParent.SetActive(true);
+                hpText.text = $"{(int)building.Health} / {(int)building.MaxHealth}";
+                return;
+            }
+        }
+
+        hpDisplayParent.SetActive(false);
     }
 }
